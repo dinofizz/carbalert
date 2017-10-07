@@ -1,6 +1,8 @@
 
 # Created by https://www.gitignore.io/api/vim,python,django,pycharm,intellij
 
+.idea/
+
 ### Django ###
 *.log
 *.pot
