@@ -1,5 +1,6 @@
 import scrapy
 import html2text
+import maya
 
 
 class CarbSpider(scrapy.Spider):
@@ -17,17 +18,21 @@ class CarbSpider(scrapy.Spider):
             item['title'] = thread.css('a.title::text').extract_first()
             item['thread_id'] = thread.css('li::attr(id)').extract_first()
             item['thread_url'] = response.urljoin(thread_url_partial)
-            request = scrapy.Request(item['thread_url'],
-                                     callback=self.parse_thread)
+            request = scrapy.Request(item['thread_url'], callback=self.parse_thread)
             request.meta['item'] = item
             yield request
 
     def parse_thread(self, response):
+        original_post_datetime = response.css('ol.posts').css('li.postbit')[0]
+        op_date = original_post_datetime.css('span.date::text').extract_first().replace(",\xa0", "")
+        op_time = original_post_datetime.css('span.date').css('span.time::text').extract_first()
+        op_datetime = f"{op_date} {op_time}"
+        datetime = maya.parse(op_datetime).iso8601()
         original_post = response.css('ol.posts').css('div.content')[0]
         item = response.meta['item']
         html = original_post.css('blockquote').extract_first()
         converter = html2text.HTML2Text()
         converter.ignore_links = True
         item['text'] = converter.handle(html)
-
+        item['datetime'] = datetime
         yield item
