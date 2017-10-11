@@ -11,8 +11,8 @@
 
 BOT_NAME = 'carbalert'
 
-SPIDER_MODULES = ['carbalert.spiders']
-NEWSPIDER_MODULE = 'carbalert.spiders'
+SPIDER_MODULES = ['carbalert_scrapy.spiders']
+NEWSPIDER_MODULE = 'carbalert_scrapy.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
@@ -65,9 +65,9 @@ DOWNLOAD_DELAY = 0.25
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'carbalert.pipelines.CarbalertPipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'carbalert_scrapy.pipelines.CarbalertPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -89,3 +89,13 @@ DOWNLOAD_DELAY = 0.25
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+import os
+import sys
+import django
+
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".."))
+print(sys.path)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'carbalert.settings'
+
+django.setup()

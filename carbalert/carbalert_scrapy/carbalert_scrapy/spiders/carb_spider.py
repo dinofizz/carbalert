@@ -25,6 +25,10 @@ class CarbSpider(scrapy.Spider):
     def parse_thread(self, response):
         original_post_datetime = response.css('ol.posts').css('li.postbit')[0]
         op_date = original_post_datetime.css('span.date::text').extract_first().replace(",\xa0", "")
+
+        if op_date == "Today" or op_date == "Yesterday":
+            op_date = maya.when(op_date).datetime().strftime("%d-%m-%Y")
+
         op_time = original_post_datetime.css('span.date').css('span.time::text').extract_first()
         op_datetime = f"{op_date} {op_time}"
         datetime = maya.parse(op_datetime).iso8601()
