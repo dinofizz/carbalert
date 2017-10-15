@@ -31,7 +31,7 @@ class CarbSpider(scrapy.Spider):
 
         op_time = original_post_datetime.css('span.date').css('span.time::text').extract_first()
         op_datetime = f"{op_date} {op_time}"
-        datetime = maya.parse(op_datetime).iso8601()
+        datetime = maya.when(op_datetime, timezone="Africa/Harare").iso8601()
         original_post = response.css('ol.posts').css('div.content')[0]
         item = response.meta['item']
         html = original_post.css('blockquote').extract_first()
