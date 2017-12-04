@@ -13,8 +13,11 @@ from carbalert_django.models import Thread, SearchPhrase
 
 class CarbalertPipeline(object):
     def process_item(self, item, spider):
+
+        thread_id = item['thread_id']
+
         try:
-            thread = Thread.objects.get(thread_id=item["thread_id"])
+            thread = Thread.objects.get(thread_id=thread_id)
             logging.info("Thread already exists.")
             return item
         except Thread.DoesNotExist:
@@ -27,26 +30,36 @@ class CarbalertPipeline(object):
         thread_url = item['thread_url']
         thread_datetime = maya.parse(item['datetime'])
 
-        phrases_found = []
-        phrase_hit = False
+        email_list = {}
 
         for search_phrase in search_phrases:
             if search_phrase.lower() in title.lower() or search_phrase.lower() in text.lower():
                 search_phrase_object = SearchPhrase.objects.get(phrase=search_phrase)
-                new_thread = Thread()
-                new_thread.thread_id = item['thread_id']
-                new_thread.title = title
-                new_thread.text = text
-                new_thread.url = thread_url
-                new_thread.datetime = thread_datetime.datetime()
-                new_thread.save()
-                new_thread.search_phrases.add(search_phrase_object)
-                new_thread.save()
-                phrase_hit = True
-                phrases_found.append(search_phrase)
 
-        if phrase_hit is True:
-            local_datetime = thread_datetime.datetime(to_timezone='Africa/Harare').strftime("%d-%m-%Y %H:%M")
-            send_email_notification.delay(phrases_found, title, text, thread_url, local_datetime)
+                for user in search_phrase_object.email_users.all():
+                    if user in email_list:
+                        phrase_hits_for_user = email_list[user]
+                        phrase_hits_for_user.append(search_phrase)
+                    else:
+                        email_list[user] = [search_phrase]
+
+                try:
+                    thread = Thread.objects.get(thread_id=thread_id)
+                except Thread.DoesNotExist:
+                    thread = Thread()
+                    thread.thread_id = thread_id
+                    thread.title = title
+                    thread.text = text
+                    thread.url = thread_url
+                    thread.datetime = thread_datetime.datetime()
+                    thread.save()
+
+                thread.search_phrases.add(search_phrase_object)
+                thread.save()
+
+        local_datetime = thread_datetime.datetime(to_timezone='Africa/Harare').strftime("%d-%m-%Y %H:%M")
+
+        for user in email_list:
+            send_email_notification.delay(user.email, email_list[user], title, text, thread_url, local_datetime)
 
         return item
