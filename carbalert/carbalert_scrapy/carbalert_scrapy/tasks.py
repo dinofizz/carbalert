@@ -5,6 +5,13 @@ from celery import Celery, bootsteps
 from celery.utils.log import get_task_logger
 import smtplib
 
+from scrapy import signals
+from scrapy.crawler import CrawlerProcess, Crawler
+from carbalert_scrapy.spiders.carb_spider import CarbSpider
+
+from twisted.internet import reactor
+from billiard import Process
+from scrapy.utils.project import get_project_settings
 
 def add_worker_arguments(parser):
     parser.add_argument(
@@ -38,6 +45,31 @@ app.user_options['worker'].add(add_worker_arguments)
 app.steps['worker'].add(SaveSenderEmailAddress)
 app.steps['worker'].add(SaveSenderEmailAddressPassword)
 
+app.conf.beat_schedule = {
+    'add-every-30-seconds': {
+        'task': 'carbalert_scrapy.tasks.scrape_carbonite',
+        'schedule': 30.0
+    },
+}
+
+class UrlCrawlerScript(Process):
+    def __init__(self, spider):
+        Process.__init__(self)
+        settings = get_project_settings()
+        self.crawler = Crawler(spider, settings)
+        self.crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
+        self.spider = spider
+
+    def run(self):
+        self.crawler.crawl(self.spider)
+        reactor.run()
+
+@app.task
+def scrape_carbonite():
+    logger.info("foooooobaaaaar")
+    spider = CarbSpider()
+    crawler = UrlCrawlerScript(spider)
+    crawler.run()
 
 @app.task
 def send_email_notification(email_address, phrases, title, text, thread_url, thread_datetime):
