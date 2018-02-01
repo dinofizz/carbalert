@@ -16,12 +16,9 @@ class CarbalertPipeline(object):
 
         thread_id = item['thread_id']
 
-        try:
-            thread = Thread.objects.get(thread_id=thread_id)
+        if Thread.objects.filter(thread_id=thread_id).exists():
             logging.info("Thread already exists.")
             return item
-        except Thread.DoesNotExist:
-            pass
 
         search_phrases = SearchPhrase.objects.values_list('phrase', flat=True)
 
