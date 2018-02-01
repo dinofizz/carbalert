@@ -1,3 +1,5 @@
+# -A carbalert_scrapy.tasks worker --loglevel=debug --max-tasks-per-child 1 --email <email_address> --password <password>
+
 from email.header import Header
 from email.mime.text import MIMEText
 
@@ -5,13 +7,9 @@ from celery import Celery, bootsteps
 from celery.utils.log import get_task_logger
 import smtplib
 
-from scrapy import signals
 from scrapy.crawler import CrawlerProcess, Crawler
 from carbalert_scrapy.spiders.carb_spider import CarbSpider
 
-from twisted.internet import reactor
-from billiard import Process
-from scrapy.utils.project import get_project_settings
 
 def add_worker_arguments(parser):
     parser.add_argument(
@@ -52,24 +50,15 @@ app.conf.beat_schedule = {
     },
 }
 
-class UrlCrawlerScript(Process):
-    def __init__(self, spider):
-        Process.__init__(self)
-        settings = get_project_settings()
-        self.crawler = Crawler(spider, settings)
-        self.crawler.signals.connect(reactor.stop, signal=signals.spider_closed)
-        self.spider = spider
-
-    def run(self):
-        self.crawler.crawl(self.spider)
-        reactor.run()
 
 @app.task
 def scrape_carbonite():
-    logger.info("foooooobaaaaar")
-    spider = CarbSpider()
-    crawler = UrlCrawlerScript(spider)
-    crawler.run()
+    process = CrawlerProcess({
+        'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
+    })
+
+    process.crawl(CarbSpider)
+    process.start()
 
 @app.task
 def send_email_notification(email_address, phrases, title, text, thread_url, thread_datetime):
