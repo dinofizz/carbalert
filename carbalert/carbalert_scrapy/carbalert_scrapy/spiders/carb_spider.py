@@ -1,6 +1,6 @@
-import scrapy
 import html2text
 import maya
+import scrapy
 
 
 class CarbSpider(scrapy.Spider):

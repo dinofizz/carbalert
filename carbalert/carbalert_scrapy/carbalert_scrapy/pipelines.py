@@ -5,19 +5,19 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
 import logging
-from .tasks import send_email_notification
-import maya
 
+import maya
 from carbalert_django.models import Thread, SearchPhrase
+
+from .tasks import send_email_notification
 
 
 class CarbalertPipeline(object):
     def process_item(self, item, spider):
-
         thread_id = item['thread_id']
 
         if Thread.objects.filter(thread_id=thread_id).exists():
-            logging.info("Thread already exists.")
+            logging.debug("Thread already exists.")
             return item
 
         search_phrases = SearchPhrase.objects.values_list('phrase', flat=True)

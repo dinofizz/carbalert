@@ -1,14 +1,14 @@
 # -A carbalert_scrapy.tasks worker --loglevel=debug --max-tasks-per-child 1 --email <email_address> --password <password>
 
+import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
 
+from carbalert_scrapy.spiders.carb_spider import CarbSpider
 from celery import Celery, bootsteps
 from celery.utils.log import get_task_logger
-import smtplib
-
-from scrapy.crawler import CrawlerProcess, Crawler
-from carbalert_scrapy.spiders.carb_spider import CarbSpider
+from scrapy.crawler import CrawlerProcess
+from scrapy.utils.project import get_project_settings
 
 
 def add_worker_arguments(parser):
@@ -44,19 +44,16 @@ app.steps['worker'].add(SaveSenderEmailAddress)
 app.steps['worker'].add(SaveSenderEmailAddressPassword)
 
 app.conf.beat_schedule = {
-    'add-every-30-seconds': {
+    'add-every-300-seconds': {
         'task': 'carbalert_scrapy.tasks.scrape_carbonite',
-        'schedule': 30.0
+        'schedule': 300.0
     },
 }
 
 
 @app.task
 def scrape_carbonite():
-    process = CrawlerProcess({
-        'USER_AGENT': 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)'
-    })
-
+    process = CrawlerProcess(settings=get_project_settings())
     process.crawl(CarbSpider)
     process.start()
 
