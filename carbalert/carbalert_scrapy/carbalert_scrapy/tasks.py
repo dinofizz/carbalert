@@ -4,11 +4,12 @@ import smtplib
 from email.header import Header
 from email.mime.text import MIMEText
 
-from carbalert_scrapy.spiders.carb_spider import CarbSpider
 from celery import Celery, bootsteps
 from celery.utils.log import get_task_logger
 from scrapy.crawler import CrawlerProcess
 from scrapy.utils.project import get_project_settings
+
+from carbalert.carbalert_scrapy.carbalert_scrapy.spiders.carb_spider import CarbSpider
 
 
 def add_worker_arguments(parser):
@@ -56,6 +57,7 @@ def scrape_carbonite():
     process = CrawlerProcess(settings=get_project_settings())
     process.crawl(CarbSpider)
     process.start()
+
 
 @app.task
 def send_email_notification(email_address, phrases, title, text, thread_url, thread_datetime):

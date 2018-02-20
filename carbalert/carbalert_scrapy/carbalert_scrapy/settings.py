@@ -95,6 +95,8 @@ import sys
 import django
 
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".."))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'carbalert.settings'
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "../../"))
+print(sys.path)
+os.environ['DJANGO_SETTINGS_MODULE'] = 'carbalert.carbalert.settings'
 
 django.setup()
