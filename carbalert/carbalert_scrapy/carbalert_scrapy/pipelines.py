@@ -11,7 +11,7 @@ import maya
 # The path for this is weird. I spent some time trying to get it to work with the a more sane import statement
 # but I was not (yet) successful.
 from carbalert_django.models import Thread, SearchPhrase
-from .tasks import send_email_notification
+from carbalert_scrapy.tasks import send_email_notification
 
 
 class CarbalertPipeline(object):

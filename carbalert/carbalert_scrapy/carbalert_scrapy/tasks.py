@@ -1,9 +1,6 @@
 # -A carbalert_scrapy.tasks worker --loglevel=debug --max-tasks-per-child 1 --email <email_address> --password <password>
 
-import smtplib
-from email.header import Header
-from email.mime.text import MIMEText
-
+import requests
 from celery import Celery, bootsteps
 from celery.utils.log import get_task_logger
 from scrapy.crawler import CrawlerProcess
@@ -14,35 +11,47 @@ from carbalert.carbalert_scrapy.carbalert_scrapy.spiders.carb_spider import Carb
 
 def add_worker_arguments(parser):
     parser.add_argument(
-        '--email', default=False,
-        help='Enable custom option.',
+        '--domain', default=False,
+        help='Mailgun domain',
     ),
     parser.add_argument(
-        '--password', default=False,
-        help='Enable custom option.',
+        '--email', default=False,
+        help='Mailgun from email address',
+    ),
+    parser.add_argument(
+        '--key', default=False,
+        help='Mailgun API key',
     ),
 
 
-class SaveSenderEmailAddress(bootsteps.Step):
+class MailgunDomain(bootsteps.Step):
+
+    def __init__(self, worker, domain, **options):
+        if domain:
+            worker.app.mailgun_domain = domain
+
+
+class MailgunFromAddress(bootsteps.Step):
 
     def __init__(self, worker, email, **options):
         if email:
-            worker.app.sender_email_address = email
+            worker.app.mailgun_from_address = email
 
 
-class SaveSenderEmailAddressPassword(bootsteps.Step):
+class MailgunApiKey(bootsteps.Step):
 
-    def __init__(self, worker, password, **options):
-        if password:
-            worker.app.sender_email_address_password = password
+    def __init__(self, worker, key, **options):
+        if key:
+            worker.app.mailgun_api_key = key
 
 
 logger = get_task_logger(__name__)
 app = Celery('tasks')
 app.conf.broker_url = 'redis://localhost:6379/0'
 app.user_options['worker'].add(add_worker_arguments)
-app.steps['worker'].add(SaveSenderEmailAddress)
-app.steps['worker'].add(SaveSenderEmailAddressPassword)
+app.steps['worker'].add(MailgunDomain)
+app.steps['worker'].add(MailgunFromAddress)
+app.steps['worker'].add(MailgunApiKey)
 
 app.conf.beat_schedule = {
     'add-every-300-seconds': {
@@ -69,26 +78,18 @@ def send_email_notification(email_address, phrases, title, text, thread_url, thr
     for phrase in phrases:
         phrase_list += f"{phrase}\n"
 
-    text = f"{phrase_list}\n{thread_datetime}\n\n{title}\n\n{text}\n\n{thread_url}"
+    text = f"{phrase_list}\n{thread_datetime}\n\n{title}\n\n{text}\n\n{thread_url}\n\nEND\n"
 
-    gmail_sender = app.sender_email_address
-    gmail_passwd = app.sender_email_address_password
-
-    server = smtplib.SMTP('smtp.gmail.com', 587)
-    server.ehlo()
-    server.starttls()
-    server.login(gmail_sender, gmail_passwd)
-
-    msg = MIMEText(text, _charset="UTF-8")
-    msg['Subject'] = Header(subject, "utf-8")
-    msg['To'] = email_address
+    mailgun_url = f"https://api.mailgun.net/v3/{app.mailgun_domain}/messages"
+    mailgun_from = f"CarbAlert <{app.mailgun_from_address}>"
 
     try:
-        server.sendmail(gmail_sender, [email_address], msg.as_string())
-        expanded_phrases = " ".join(phrases)
-        logger.info(f"email sent to {email_address} for search phrase(s): {expanded_phrases}")
+        requests.post(
+            mailgun_url,
+            auth=("api", app.mailgun_api_key),
+            data={"from": mailgun_from,
+                  "to": [email_address],
+                  "subject": subject,
+                  "text": text})
     except Exception as ex:
-        logger.error(ex)
-        logger.error('error sending mail')
-
-    server.quit()
+        logger.error(f"Error sending mail: {ex}")
