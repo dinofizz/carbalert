@@ -1,5 +1,3 @@
-# -A carbalert_scrapy.tasks worker --loglevel=debug --max-tasks-per-child 1 --email <email_address> --password <password>
-
 import requests
 from celery import Celery, bootsteps
 from celery.utils.log import get_task_logger
