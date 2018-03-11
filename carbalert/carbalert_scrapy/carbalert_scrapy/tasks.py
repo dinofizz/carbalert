@@ -8,11 +8,8 @@ from scrapy.utils.project import get_project_settings
 from carbalert.carbalert_scrapy.carbalert_scrapy.spiders.carb_spider import CarbSpider
 
 
-class APITask(Task):
-    """API requests task class."""
-
+class MailgunAPITask(Task):
     abstract = True
-
     mailgun_api_key = None
     mailgun_email = None
     mailgun_domain = None
@@ -21,9 +18,9 @@ class APITask(Task):
 class MailgunArgs(bootsteps.Step):
 
     def __init__(self, worker, mailgun_domain, mailgun_email, mailgun_api_key, **options):
-        APITask.mailgun_domain = mailgun_domain[0]
-        APITask.mailgun_email = mailgun_email[0]
-        APITask.mailgun_api_key = mailgun_api_key[0]
+        MailgunAPITask.mailgun_domain = mailgun_domain[0]
+        MailgunAPITask.mailgun_email = mailgun_email[0]
+        MailgunAPITask.mailgun_api_key = mailgun_api_key[0]
 
 
 logger = get_task_logger(__name__)
@@ -58,7 +55,7 @@ def scrape_carbonite():
     process.start()
 
 
-@shared_task(base=APITask, bind=True)
+@shared_task(base=MailgunAPITask, bind=True)
 def send_email_notification(self, email_address, phrases, title, text, thread_url, thread_datetime):
     logger.info(f"Received alert for {email_address} for thread title: {title}")
     subject = f"CARBALERT: {title}"
