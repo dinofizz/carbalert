@@ -22,10 +22,14 @@ class MailgunArgs(bootsteps.Step):
         MailgunAPITask.mailgun_email = mailgun_email[0]
         MailgunAPITask.mailgun_api_key = mailgun_api_key[0]
 
+import sys
+for p in sys.path:
+    print(p)
 
 logger = get_task_logger(__name__)
 app = Celery('tasks')
-app.conf.broker_url = 'redis://localhost:6379/0'
+app.conf.broker_url = 'redis://redis:6379/0'
+# app.conf.broker_url = 'redis://localhost:6379/0'
 app.user_options['worker'].add(
     Option('--domain', dest='mailgun_domain', default=None, help='Mailgun domain')
 )
@@ -42,14 +46,19 @@ app.steps['worker'].add(MailgunArgs)
 
 app.conf.beat_schedule = {
     'add-every-300-seconds': {
-        'task': 'carbalert_scrapy.tasks.scrape_carbonite',
-        'schedule': 300.0
+        'task': 'carbalert.carbalert_scrapy.carbalert_scrapy.tasks.scrape_carbonite',
+        'schedule': 20.0
     },
 }
 
 
 @app.task
 def scrape_carbonite():
+    logger.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
+    logger.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
+    logger.debug("FOOOOOOBAARRRRR")
+    logger.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
+    logger.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
     process = CrawlerProcess(settings=get_project_settings())
     process.crawl(CarbSpider)
     process.start()

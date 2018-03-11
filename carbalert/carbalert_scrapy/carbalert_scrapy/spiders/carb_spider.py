@@ -1,3 +1,5 @@
+import logging
+
 import html2text
 import maya
 import scrapy
@@ -10,6 +12,7 @@ class CarbSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
+        logging.debug("*************************")
         threads = response.css('ol.threads').css('li.threadbit')
 
         for thread in threads:
@@ -23,6 +26,7 @@ class CarbSpider(scrapy.Spider):
             yield request
 
     def parse_thread(self, response):
+        logging.debug("@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
         original_post_datetime = response.css('ol.posts').css('li.postbit')[0]
         op_date = original_post_datetime.css('span.date::text').extract_first().replace(",\xa0", "")
 
