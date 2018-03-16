@@ -22,10 +22,6 @@ class MailgunArgs(bootsteps.Step):
         MailgunAPITask.mailgun_email = mailgun_email[0]
         MailgunAPITask.mailgun_api_key = mailgun_api_key[0]
 
-import sys
-for p in sys.path:
-    print(p)
-
 logger = get_task_logger(__name__)
 app = Celery('tasks')
 app.conf.broker_url = 'redis://redis:6379/0'
@@ -45,9 +41,9 @@ app.user_options['worker'].add(
 app.steps['worker'].add(MailgunArgs)
 
 app.conf.beat_schedule = {
-    'add-every-300-seconds': {
+    'scrape-every-300-seconds': {
         'task': 'carbalert.carbalert_scrapy.carbalert_scrapy.tasks.scrape_carbonite',
-        'schedule': 20.0
+        'schedule': 300.0
     },
 }
 

@@ -17,11 +17,6 @@ from carbalert.carbalert_scrapy.carbalert_scrapy.tasks import send_email_notific
 class CarbalertPipeline(object):
     def process_item(self, item, spider):
         thread_id = item['thread_id']
-        logging.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
-        logging.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
-        logging.debug(thread_id)
-        logging.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
-        logging.debug("^^^^^^^^^^^^^^^^^^^^^^^^")
 
         if Thread.objects.filter(thread_id=thread_id).exists():
             logging.debug("Thread already exists.")
