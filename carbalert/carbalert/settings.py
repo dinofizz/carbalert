@@ -27,7 +27,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-FORCE_SCRIPT_NAME = 'carbalert'
+FORCE_SCRIPT_NAME = '/carbalert'
 
 
 # Application definition
