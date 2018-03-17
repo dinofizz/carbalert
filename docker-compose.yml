@@ -7,8 +7,6 @@ services:
     build: .
     working_dir: /code/carbalert
     command: gunicorn carbalert.wsgi -b 0.0.0.0:8000 
-    volumes:
-      - web-volume:/code
     ports:
       - "8000:8000"
     depends_on:
@@ -18,8 +16,6 @@ services:
     build: .
     working_dir: /code
     command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks worker --loglevel=debug --max-tasks-per-child 1 --email "${MAILGUN_EMAIL}" --key ${MAILGUN_API_KEY} --domain ${MAILGUN_DOMAIN}
-    volumes:
-        - web-volume:/code
     depends_on:
       - web
       - redis
@@ -28,8 +24,6 @@ services:
     build: .
     working_dir: /code
     command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=debug
-    volumes:
-        - web-volume:/code
     depends_on:
       - celery_worker 
 
@@ -39,5 +33,3 @@ services:
     ports:
       - '127.0.0.1:6379:6379'
 
-volumes:
-  web-volume:
