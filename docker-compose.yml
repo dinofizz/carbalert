@@ -3,6 +3,8 @@ version: '3'
 services:
   db:
     image: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresl/data/
   web:
     build: .
     working_dir: /code/carbalert
@@ -35,3 +37,5 @@ services:
     ports:
       - '127.0.0.1:6379:6379'
 
+volumes:
+  postgres_data:
