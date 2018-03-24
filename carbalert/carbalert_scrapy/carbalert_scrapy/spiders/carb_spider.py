@@ -8,15 +8,17 @@ import scrapy
 class CarbSpider(scrapy.Spider):
     name = "carb"
     start_urls = [
-        'http://carbonite.co.za/forumdisplay.php?47-Laptops',
+        'http://xenforo2.carbonite.co.za/index.php?forums/laptops.32/',
     ]
 
     def parse(self, response):
-        threads = response.css('ol.threads').css('li.threadbit')
+        threads = response.css('.js-threadList').css('.structItem--thread')
+        # threads = response.css('ol.threads').css('li.threadbit')
 
         for thread in threads:
             item = {}
-            thread_url_partial = thread.css('a.title::attr(href)').extract_first()
+            thread_url_partial = thread.css('.structItem-cell--main').xpath(".//a").css("::attr(href)")[1].extract()
+            # redo fromi here
             item['title'] = thread.css('a.title::text').extract_first()
             item['thread_id'] = thread.css('li::attr(id)').extract_first()
             item['thread_url'] = response.urljoin(thread_url_partial)
