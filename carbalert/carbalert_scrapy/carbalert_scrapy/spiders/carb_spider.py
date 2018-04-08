@@ -1,8 +1,6 @@
-import logging
+import re
 
 import html2text
-import maya
-import re
 import scrapy
 
 
@@ -14,13 +12,13 @@ class CarbSpider(scrapy.Spider):
 
     def parse(self, response):
         threads = response.css('.js-threadList').css('.structItem--thread')
-        # threads = response.css('ol.threads').css('li.threadbit')
 
         for thread in threads:
             item = {}
             thread_url_partial = thread.css('.structItem-cell--main').xpath(".//a").css("::attr(href)")[1].extract()
-            item['title'] = thread.css('.structItem-cell--main').css('.structItem-title').xpath('.//a/text()').extract_first()
-            item['thread_id'] = re.findall(r'\.(\d+)\/', thread_url_partial)[0]
+            item['title'] = thread.css('.structItem-cell--main').css('.structItem-title').xpath(
+                './/a/text()').extract_first()
+            item['thread_id'] = re.findall(r'\.(\d+)/', thread_url_partial)[0]
             item['thread_url'] = response.urljoin(thread_url_partial)
             request = scrapy.Request(item['thread_url'], callback=self.parse_thread)
             request.meta['item'] = item
@@ -28,7 +26,7 @@ class CarbSpider(scrapy.Spider):
 
     def parse_thread(self, response):
         datetime = response.css('.message-main')[0].xpath('.//time').css("::attr(datetime)").extract_first()
-        html =  response.css('.message-main')[0].css('.bbWrapper').extract_first()
+        html = response.css('.message-main')[0].css('.bbWrapper').extract_first()
         converter = html2text.HTML2Text()
         converter.ignore_links = True
         item = response.meta['item']

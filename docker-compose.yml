@@ -11,7 +11,6 @@ services:
     command: gunicorn carbalert.wsgi -b 0.0.0.0:8000
     volumes:
       - "/static:/static"
-      - web-volume:/code
     ports:
       - "8000:8000"
     depends_on:
@@ -40,4 +39,3 @@ services:
 
 volumes:
   postgres_data:
-  web-volume:
