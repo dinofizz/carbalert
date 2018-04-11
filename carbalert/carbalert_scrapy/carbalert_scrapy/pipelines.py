@@ -67,7 +67,6 @@ class CarbalertPipeline(object):
 
         local_datetime = thread_datetime.datetime(to_timezone='Africa/Harare').strftime("%d-%m-%Y %H:%M")
 
-        logging.info(f"Sending email notification for thread ID: {thread_id}")
         for user in email_list:
             logging.info(f"Sending email notification to user {user} for thread ID {thread_id}, thread title: {title}")
             send_email_notification.delay(user.email, email_list[user], title, text, thread_url, local_datetime)
