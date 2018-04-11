@@ -71,6 +71,7 @@ def send_email_notification(self, email_address, phrases, title, text, thread_ur
     mailgun_from = f"CarbAlert <{self.mailgun_email}>"
 
     try:
+        logger.info(f"Sending mail to {email_address}")
         response = requests.post(
             mailgun_url,
             auth=("api", self.mailgun_api_key),
@@ -79,7 +80,7 @@ def send_email_notification(self, email_address, phrases, title, text, thread_ur
                   "subject": subject,
                   "text": text})
         if response.status_code is not 200:
-            logger.error(f"Unexpected error code received on Mailgun response. "
+            logger.error(f"Unexpected error code received on Mailgun response for email to {email_address}. "
                          f"Code: {response.status_code}, Raw {response.raw}")
     except Exception as ex:
-        logger.error(f"Error sending mail: {ex}")
+        logger.error(f"Error sending mail to {email_address}: {ex}")

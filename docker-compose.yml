@@ -19,7 +19,7 @@ services:
   celery_worker:
     build: .
     working_dir: /code
-    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks worker --loglevel=debug --max-tasks-per-child 1 --email "${MAILGUN_EMAIL}" --key ${MAILGUN_API_KEY} --domain ${MAILGUN_DOMAIN}
+    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks worker --loglevel=info -f celery_worker.log --max-tasks-per-child 1 --email "${MAILGUN_EMAIL}" --key ${MAILGUN_API_KEY} --domain ${MAILGUN_DOMAIN}
     depends_on:
       - web
       - redis
@@ -27,7 +27,7 @@ services:
   celery_beat:
     build: .
     working_dir: /code
-    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=debug
+    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=info -f celery_beat.log
     depends_on:
       - celery_worker 
 

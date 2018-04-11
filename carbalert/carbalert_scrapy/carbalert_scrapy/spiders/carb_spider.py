@@ -1,3 +1,4 @@
+import logging
 import re
 
 import html2text
@@ -11,25 +12,44 @@ class CarbSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
+        logging.info("CarbSpider: Parsing response")
         threads = response.css('.js-threadList').css('.structItem--thread')
+
+        logging.info(f"Found {len(threads)} threads.")
 
         for thread in threads:
             item = {}
+
             thread_url_partial = thread.css('.structItem-cell--main').xpath(".//a").css("::attr(href)")[1].extract()
-            item['title'] = thread.css('.structItem-cell--main').css('.structItem-title').xpath(
+            thread_url = response.urljoin(thread_url_partial)
+            logging.info(f"Thread URL: {thread_url}")
+            item['thread_url'] = thread_url
+
+            thread_title = thread.css('.structItem-cell--main').css('.structItem-title').xpath(
                 './/a/text()').extract_first()
-            item['thread_id'] = re.findall(r'\.(\d+)/', thread_url_partial)[0]
-            item['thread_url'] = response.urljoin(thread_url_partial)
+            logging.info(f"Thread title: {thread_title}")
+            item['title'] = thread_title
+
+            thread_id = re.findall(r'\.(\d+)/', thread_url_partial)[0]
+            item['thread_id'] = thread_id
+            logging.info(f"Thread ID: {thread_id}")
+
             request = scrapy.Request(item['thread_url'], callback=self.parse_thread)
             request.meta['item'] = item
             yield request
 
     def parse_thread(self, response):
-        datetime = response.css('.message-main')[0].xpath('.//time').css("::attr(datetime)").extract_first()
+        item = response.meta['item']
+
+        thread_timestamp = response.css('.message-main')[0].xpath('.//time').css("::attr(datetime)").extract_first()
+        logging.info(f"Thread timestamp: {thread_timestamp}")
+        item['datetime'] = thread_timestamp
+
         html = response.css('.message-main')[0].css('.bbWrapper').extract_first()
         converter = html2text.HTML2Text()
         converter.ignore_links = True
-        item = response.meta['item']
-        item['text'] = converter.handle(html)
-        item['datetime'] = datetime
+        thread_text = converter.handle(html)
+        logging.info(f"Thread text: {thread_text}")
+        item['text'] = thread_text
+
         yield item
