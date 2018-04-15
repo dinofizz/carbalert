@@ -82,5 +82,7 @@ def send_email_notification(self, email_address, phrases, title, text, thread_ur
         if response.status_code is not 200:
             logger.error(f"Unexpected error code received on Mailgun response for email to {email_address}. "
                          f"Code: {response.status_code}, Raw {response.raw}")
+            response.raise_for_status()
     except Exception as ex:
         logger.error(f"Error sending mail to {email_address}: {ex}")
+        raise ex

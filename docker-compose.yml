@@ -29,7 +29,16 @@ services:
     working_dir: /code
     command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=info -f celery_beat.log
     depends_on:
-      - celery_worker 
+      - celery_worker
+
+  celery_flower:
+    build: .
+    working_dir: /code
+    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks flower --loglevel=debug --auth_provider=flower.views.auth.GithubLoginHandler --auth=${FLOWER_OAUTH2_EMAIL} --oauth2_key=${FLOWER_OAUTH2_KEY} --oauth2_secret=${FLOWER_OAUTH2_SECRET} --oauth2_redirect_uri=${FLOWER_OAUTH2_REDIRECT_URI} --url_prefix=flower
+    ports:
+      - "5555:5555"
+    depends_on:
+      - celery_worker
 
   redis:
     container_name: 'redis'
