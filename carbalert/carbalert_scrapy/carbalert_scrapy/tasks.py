@@ -16,35 +16,41 @@ class MailgunAPITask(Task):
 
 
 class MailgunArgs(bootsteps.Step):
-
-    def __init__(self, worker, mailgun_domain, mailgun_email, mailgun_api_key, **options):
+    def __init__(
+        self, worker, mailgun_domain, mailgun_email, mailgun_api_key, **options
+    ):
         MailgunAPITask.mailgun_domain = mailgun_domain[0]
         MailgunAPITask.mailgun_email = mailgun_email[0]
         MailgunAPITask.mailgun_api_key = mailgun_api_key[0]
 
 
 logger = get_task_logger(__name__)
-app = Celery('tasks')
-app.conf.broker_url = 'redis://redis:6379/0'
-app.user_options['worker'].add(
-    Option('--domain', dest='mailgun_domain', default=None, help='Mailgun domain')
+app = Celery("tasks")
+app.conf.broker_url = "redis://redis:6379/0"
+app.user_options["worker"].add(
+    Option("--domain", dest="mailgun_domain", default=None, help="Mailgun domain")
 )
 
-app.user_options['worker'].add(
-    Option('--email', dest='mailgun_email', default=None, help='Mailgun "from" email address.')
+app.user_options["worker"].add(
+    Option(
+        "--email",
+        dest="mailgun_email",
+        default=None,
+        help='Mailgun "from" email address.',
+    )
 )
 
-app.user_options['worker'].add(
-    Option('--key', dest='mailgun_api_key', default=None, help='Mailgun API key')
+app.user_options["worker"].add(
+    Option("--key", dest="mailgun_api_key", default=None, help="Mailgun API key")
 )
 
-app.steps['worker'].add(MailgunArgs)
+app.steps["worker"].add(MailgunArgs)
 
 app.conf.beat_schedule = {
-    'scrape-every-300-seconds': {
-        'task': 'carbalert.carbalert_scrapy.carbalert_scrapy.tasks.scrape_carbonite',
-        'schedule': 300.0
-    },
+    "scrape-every-300-seconds": {
+        "task": "carbalert.carbalert_scrapy.carbalert_scrapy.tasks.scrape_carbonite",
+        "schedule": 300.0,
+    }
 }
 
 
@@ -56,7 +62,9 @@ def scrape_carbonite():
 
 
 @shared_task(base=MailgunAPITask, bind=True)
-def send_email_notification(self, email_address, phrases, title, text, thread_url, thread_datetime):
+def send_email_notification(
+    self, email_address, phrases, title, text, thread_url, thread_datetime
+):
     logger.info(f"Received alert for {email_address} for thread title: {title}")
     subject = f"CARBALERT: {title}"
 
@@ -75,13 +83,18 @@ def send_email_notification(self, email_address, phrases, title, text, thread_ur
         response = requests.post(
             mailgun_url,
             auth=("api", self.mailgun_api_key),
-            data={"from": mailgun_from,
-                  "to": [email_address],
-                  "subject": subject,
-                  "text": text})
+            data={
+                "from": mailgun_from,
+                "to": [email_address],
+                "subject": subject,
+                "text": text,
+            },
+        )
         if response.status_code is not 200:
-            logger.error(f"Unexpected error code received on Mailgun response for email to {email_address}. "
-                         f"Code: {response.status_code}, Raw {response.raw}")
+            logger.error(
+                f"Unexpected error code received on Mailgun response for email to {email_address}. "
+                f"Code: {response.status_code}, Raw {response.raw}"
+            )
             response.raise_for_status()
     except Exception as ex:
         logger.error(f"Error sending mail to {email_address}: {ex}")

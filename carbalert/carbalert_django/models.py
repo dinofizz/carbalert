@@ -4,7 +4,7 @@ from django.db import models
 
 class SearchPhrase(models.Model):
     phrase = models.CharField(max_length=100, blank=True)
-    email_users = models.ManyToManyField(User, related_name='email_users')
+    email_users = models.ManyToManyField(User, related_name="email_users")
 
     def __str__(self):
         return self.phrase
