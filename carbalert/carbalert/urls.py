@@ -19,3 +19,8 @@ from django.contrib import admin
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
 ]
+
+carb_alert = "CarbAlert"
+admin.site.site_header = carb_alert
+admin.site.site_title = carb_alert
+admin.site.index_title = carb_alert
