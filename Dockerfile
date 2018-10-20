@@ -3,5 +3,6 @@ ENV PYTHONUNBUFFERED 1
 RUN apt-get update && apt-get -y upgrade
 RUN mkdir /code
 WORKDIR /code
-ADD . /code/
+ADD requirements.txt /code/
 RUN pip install -r requirements.txt
+ADD . /code/
