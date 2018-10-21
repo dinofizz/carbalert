@@ -9,11 +9,13 @@
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 
+import os
+import sys
+
 BOT_NAME = "carbalert"
 
 SPIDER_MODULES = ["carbalert_scrapy.spiders"]
 NEWSPIDER_MODULE = "carbalert_scrapy.spiders"
-
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 # USER_AGENT = 'carbalert (+http://www.yourdomain.com)'
@@ -88,10 +90,6 @@ ITEM_PIPELINES = {"carbalert_scrapy.pipelines.CarbalertPipeline": 300}
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-import os
-import sys
-import django
-
 sys.path.append(
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
@@ -101,6 +99,3 @@ sys.path.append(
 sys.path.append(
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "../../")
 )
-os.environ["DJANGO_SETTINGS_MODULE"] = "carbalert.carbalert.settings"
-
-django.setup()

@@ -16,21 +16,25 @@ services:
       - "8000:8000"
     depends_on:
       - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
 
   celery_worker:
     build: .
     working_dir: /code
-    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks worker --loglevel=info -f celery_worker.log --max-tasks-per-child 1 --email "${MAILGUN_EMAIL}" --key ${MAILGUN_API_KEY} --domain ${MAILGUN_DOMAIN}
+    command: celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks worker --loglevel=info -f celery_worker.log --max-tasks-per-child 1 --email "${MAILGUN_EMAIL}" --key ${MAILGUN_API_KEY} --domain ${MAILGUN_DOMAIN}
     volumes:
       - .:/code
     depends_on:
       - web
       - redis
+    environment:
+      - SCRAPY_SETTINGS_MODULE=${SCRAPY_SETTINGS_MODULE}
 
   celery_beat:
     build: .
     working_dir: /code
-    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=info -f celery_beat.log
+    command: celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=info -f celery_beat.log
     volumes:
       - .:/code
     depends_on:
@@ -39,7 +43,7 @@ services:
   celery_flower:
     build: .
     working_dir: /code
-    command: python -m celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks flower --loglevel=debug --auth_provider=flower.views.auth.GithubLoginHandler --auth=${FLOWER_OAUTH2_EMAIL} --oauth2_key=${FLOWER_OAUTH2_KEY} --oauth2_secret=${FLOWER_OAUTH2_SECRET} --oauth2_redirect_uri=${FLOWER_OAUTH2_REDIRECT_URI} --url_prefix=flower
+    command: celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks flower --loglevel=debug --auth_provider=flower.views.auth.GithubLoginHandler --auth=${FLOWER_OAUTH2_EMAIL} --oauth2_key=${FLOWER_OAUTH2_KEY} --oauth2_secret=${FLOWER_OAUTH2_SECRET} --oauth2_redirect_uri=${FLOWER_OAUTH2_REDIRECT_URI} --url_prefix=flower
     ports:
       - "5555:5555"
     volumes:
