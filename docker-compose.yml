@@ -1,5 +1,5 @@
+---
 version: '3'
-
 services:
   db:
     image: postgres
@@ -30,6 +30,7 @@ services:
       - redis
     environment:
       - SCRAPY_SETTINGS_MODULE=${SCRAPY_SETTINGS_MODULE}
+      - REDIS_HOST=${REDIS_HOST}
 
   celery_beat:
     build: .
@@ -39,6 +40,8 @@ services:
       - .:/code
     depends_on:
       - celery_worker
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
 
   celery_flower:
     build: .
@@ -50,6 +53,8 @@ services:
       - .:/code
     depends_on:
       - celery_worker
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
 
   redis:
     container_name: 'redis'
