@@ -16,8 +16,6 @@ services:
       - "8000:8000"
     depends_on:
       - db
-    environment:
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
 
   celery_worker:
     build: .
@@ -28,9 +26,6 @@ services:
     depends_on:
       - web
       - redis
-    environment:
-      - SCRAPY_SETTINGS_MODULE=${SCRAPY_SETTINGS_MODULE}
-      - REDIS_HOST=${REDIS_HOST}
 
   celery_beat:
     build: .
@@ -40,8 +35,6 @@ services:
       - .:/code
     depends_on:
       - celery_worker
-    environment:
-      - REDIS_HOST=${REDIS_HOST}
 
   celery_flower:
     build: .
@@ -53,8 +46,6 @@ services:
       - .:/code
     depends_on:
       - celery_worker
-    environment:
-      - REDIS_HOST=${REDIS_HOST}
 
   redis:
     container_name: 'redis'

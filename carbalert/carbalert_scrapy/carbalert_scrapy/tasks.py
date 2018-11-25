@@ -27,9 +27,7 @@ class MailgunArgs(bootsteps.Step):
 logger = get_task_logger(__name__)
 app = Celery("tasks")
 
-redis_host = get_env_variable("REDIS_HOST")
-
-app.conf.broker_url = "redis://" + redis_host + "/0"
+app.conf.broker_url = "redis://redis:6379/0"
 app.user_options["worker"].add(
     Option("--domain", dest="mailgun_domain", default=None, help="Mailgun domain")
 )
