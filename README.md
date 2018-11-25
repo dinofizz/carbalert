@@ -41,7 +41,53 @@ Once you have completed the necessary steps to register an app you should note d
 
 You will need these values later.
 
-## Local Development
+## Docker setup for development or production
+
+### Pre-requisites
+
+(I tested this on a fresh install of Ubuntu 18.04)
+
+Make sure that you have an up-to-date version of:
+ 
+* [Docker](https://store.docker.com/search?type=edition&offering=community)
+* [Docker Compose](https://docs.docker.com/compose/install/)
+
+### Running CarbAlert
+
+The `docker-compose.yml` file requires certain environment variables to be present for deployment. I use a `.env` file for managing the environment variables. 
+
+Here is an example of my `.env` file:
+
+```bash
+# Settings
+DJANGO_SETTINGS_MODULE=carbalert.settings
+
+# Mailgun
+MAILGUN_EMAIL=<insert the "from" email address for Mailgun mails here>
+MAILGUN_API_KEY=<insert your Mailgun API key here>
+MAILGUN_DOMAIN=<insert your Mailgun domain here>
+
+# GitHub OAuth2
+FLOWER_OAUTH2_EMAIL=<insert your OAuth2 GitHub email here>
+FLOWER_OAUTH2_KEY=<insert your OAuth2 secret here>
+FLOWER_OAUTH2_SECRET=<insert your OAuth2 secret here>
+FLOWER_OAUTH2_REDIRECT_URI=<insert OAuth2 redirect URI here>
+
+# Redis
+REDIS_HOST=redis:6379
+
+# Django secret
+SECRET_KEY=<insert your secret key here - only necessery for production deployment>
+
+```
+
+*Please note:* Existing environment variables available in your current terminal session will override those in the `.env` file.
+
+#### Production deployment
+
+For *production* deployments replace the words "development" with "production" in the `DJANGO_SETTINGS_MODULE` and `SCRAPY_SETTINGS_MODULE`.
+
+## Non-Docker local set-up
 
 ### Make sure you have Python 3.6
 
@@ -96,13 +142,13 @@ To run the Django app we go through the typical Django `manage.py` commands, but
 
 ``` Bash
 # Prepare the database migrations
-(carbalert-venv) $ python carbalert/manage.py makemigrations --settings=carbalert.settings.development
+(carbalert-venv) $ python carbalert/manage.py makemigrations
 
 # Make the database migrations
-(carbalert-venv) $ python carbalert/manage.py migrate --settings=carbalert.settings.development
+(carbalert-venv) $ python carbalert/manage.py migrate
 
 # Run the Django application on the development web server
-(carbalert-venv) $ python carbalert/manage.py runserver --settings=carbalert.settings.development
+(carbalert-venv) $ python carbalert/manage.py runserver
 ```
 
 #### Celery Worker

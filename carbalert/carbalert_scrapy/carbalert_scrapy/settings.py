@@ -99,3 +99,9 @@ sys.path.append(
 sys.path.append(
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "../../")
 )
+
+# We load this here and not directly via a "pre-set" environment variable because of path weirdness when Django
+# starts-up via the celery fixup.
+os.environ["DJANGO_SETTINGS_MODULE"] = "carbalert.carbalert.settings"
+
+django.setup()
