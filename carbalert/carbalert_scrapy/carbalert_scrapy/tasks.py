@@ -1,5 +1,4 @@
 import requests
-from carbalert.carbalert.env_var_helper import get_env_variable
 from carbalert.carbalert_scrapy.carbalert_scrapy.spiders.carb_spider import CarbSpider
 from celery import Celery, bootsteps, Task, shared_task
 from celery.bin import Option
