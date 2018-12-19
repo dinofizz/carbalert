@@ -10,7 +10,6 @@ services:
     working_dir: /code/carbalert
     command: gunicorn carbalert.wsgi -b 0.0.0.0:8000
     volumes:
-      - .:/code
       - "/static:/static"
     ports:
       - "8000:8000"
@@ -26,6 +25,8 @@ services:
     depends_on:
       - web
       - redis
+    environment:
+      - SCRAPY_SETTINGS_MODULE=carbalert.carbalert_scrapy.carbalert_scrapy.settings
 
   celery_beat:
     build: .
@@ -42,8 +43,6 @@ services:
     command: celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks flower --loglevel=debug --auth_provider=flower.views.auth.GithubLoginHandler --auth=${FLOWER_OAUTH2_EMAIL} --oauth2_key=${FLOWER_OAUTH2_KEY} --oauth2_secret=${FLOWER_OAUTH2_SECRET} --oauth2_redirect_uri=${FLOWER_OAUTH2_REDIRECT_URI} --url_prefix=flower
     ports:
       - "5555:5555"
-    volumes:
-      - .:/code
     depends_on:
       - celery_worker
 
@@ -52,6 +51,7 @@ services:
     image: 'redis:3.2.0'
     ports:
       - '127.0.0.1:6379:6379'
+
   nginx:
     restart: always
     container_name: nginx_server

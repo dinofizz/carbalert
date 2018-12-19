@@ -11,6 +11,7 @@
 
 import os
 import sys
+import django
 
 BOT_NAME = "carbalert"
 

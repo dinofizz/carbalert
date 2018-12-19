@@ -11,6 +11,7 @@ class CarbSpider(scrapy.Spider):
 
     def parse(self, response):
         logging.info("CarbSpider: Parsing response")
+
         threads = response.css(".js-threadList").css(".structItem--thread")
 
         logging.info(f"Found {len(threads)} threads.")
