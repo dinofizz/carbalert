@@ -52,18 +52,19 @@ services:
     ports:
       - '127.0.0.1:6379:6379'
 
-  nginx:
-    restart: always
-    container_name: nginx_server
-    build:
-      context: ./nginx-docker/
-      dockerfile: Dockerfile
-    depends_on:
-      - celery_flower 
-    ports:
-      - "0.0.0.0:80:80"
-    volumes:
-      - "/static:/static"
+# Uncomment below for local dev set-up
+#  nginx:
+#    restart: always
+#    container_name: nginx_server
+#    build:
+#      context: ./nginx-docker/
+#      dockerfile: Dockerfile
+#    depends_on:
+#      - celery_flower
+#    ports:
+#      - "0.0.0.0:80:80"
+#    volumes:
+#      - "/static:/static"
 
 volumes:
   postgres_data:
