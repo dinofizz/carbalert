@@ -104,7 +104,7 @@ But I have included an "nginx" service in the docker-compose.yml file which will
 
 What follows is a walk-through on how to add a user which will be receiving alerts on a newly added search term.
 
-## Create a new user which will receive alerts
+### Create a new user which will receive alerts
 
 To create a new user for which search terms will be registered login with the admin user and navigate from the admin landing page to the "Users" admin page and then click the "Add user +" button on the top right. You will need to provide a username and the email address. This is the email address will be used when sending the alerts.
 
@@ -112,7 +112,7 @@ To create a new user for which search terms will be registered login with the ad
 
 ![User saved](images/dinofizz_saved.png "User saved")
 
-## Register a search term
+### Register a search term
 
 To register a search term you need to navigate to the "Search phrases" page from the main admin landing page, and then select the "Add search phrase +" button on the top right. You need to enter a search term and select the user which will be receiving the alerts for this term.
 
