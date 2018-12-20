@@ -90,6 +90,8 @@ If all goes well you should be able to navigate to http://127.0.0.1/admin and se
 
 ![Django admin console login screen](images/carbalert_login.png "Django admin console login screen")
 
+You should also be able to navigate to http://127.0.0.1/flower to see the Flower dashboard.
+
 ### Note on optional Nginx container
 
 In production I am running CarbAlert on a virtual private server (VPS) instance whose Nginx configuration I manage manually, so I have no need for a dedicated container running Nginx.

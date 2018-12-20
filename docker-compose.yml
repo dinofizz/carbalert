@@ -5,6 +5,7 @@ services:
     image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+      
   web:
     build: .
     working_dir: /code/carbalert
