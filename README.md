@@ -54,11 +54,7 @@ The `docker-compose.yml` file requires certain environment variables to be prese
 
 Here is an example of my `.env` file:
 
-```bas## Note on optional Nginx container
-
-In production I am running CarbAlert on a virtual private server (VPS) instance whose Nginx configuration I manage manually, so I have no need for a dedicated container running Nginx.
-
-But I have included an "nginx" service in the docker-compose.yml file which will act as a reverse proxy for the Django and Flower web applications. This is most useful for local development and debugging as you will not need to install or setup Nginx on your host machine. However I have kept this service commented-out in the docker-compose.yml file. Un-comment the "nginx" service lines if you wish to run the Nginx container.
+```bash
 # Mailgun
 MAILGUN_EMAIL=<insert the "from" email address for Mailgun mails here>
 MAILGUN_API_KEY=<insert your Mailgun API key here>
