@@ -1,6 +1,6 @@
 # CarbAlert
 
-CarbAlert is a web application which scrapes a local (South African) second-hand computer parts forum for new posts offering laptops featuring keywords of interest. I'm using Django for the admin console and database/ORM integration, Scrapy for web-scraping, Celery for task management and Mailgun for sending out alert emails. The application is hosted on a VPS and is deployed using Docker.
+CarbAlert is a web application which scrapes a local (South African) second-hand computer parts forum for new posts offering laptops featuring keywords of interest (specifically the [first page of the "laptops" forum](https://carbonite.co.za/index.php?forums/laptops.32/)) I'm using [Django](https://www.djangoproject.com/) for the admin console and database/ORM integration, [Scrapy](https://scrapy.org/) for web-scraping, [Celery](http://www.celeryproject.org/) for task management, [Flower](https://flower.readthedocs.io/en/latest/) for task monitoring and [Mailgun](https://www.mailgun.com/) for sending out alert emails. I am using [Docker](https://www.docker.com/) to manage and run the containers which make up the CarbAlert application.
 
 ![Django admin console showing results](images/dell_results.png "Django admin console showing results")
 
@@ -12,8 +12,6 @@ For both local and production deployments you will need to register and obtain t
 
 GitHub OAuth registration is required for production deployments where the Flower front-end is accessible over the internet.
 
-There are Python pre-requisites for running CarbAlert on your local machine for development and testing, and there are the Docker and Nginx pre-requisites for deploying and running CarbAlert on a server. These will be explained in detail in the sections below.
-
 ### Mailgun registration
 
 The email alerts are sent using the [Mailgun](https://www.mailgun.com) API. Mailgun will allow you to send up to 10000 emails a month before charging you - fine for development and testing.
@@ -23,13 +21,11 @@ To get started with Mailgun take a look at their docs. [Quick-start guide here](
 Once you have registered and set up your Mailgun "domain" you should be able to see and save the following values:
 
 - Mailgun domain. I'm using "mg.dinofizzotti.com"
-- Mailgun API key. I'm using "key-88bf..." :P
+- Mailgun API key.
 
-Keep these values on-hand, you will need them later during deployment (local and production).
+Keep these values on-hand, you will need them later during deployment.
 
 ### Flower / GitHub OAuth registration
-
-**You can skip this if you will only be working with CarbAlert on your local machine and not deploying to "production" for public access.**
 
 CarbAlert uses [Flower](https://flower.readthedocs.io) as a front-end for inspectin the Celery tasks. I went with GitHub OAuth as an authentication mechanism (I don't want just anybody inspecting my Celery tasks). To get set up with GitHub OAuth start reading [here](https://flower.readthedocs.io/en/latest/auth.html#github-oauth).
 
@@ -41,27 +37,28 @@ Once you have completed the necessary steps to register an app you should note d
 
 You will need these values later.
 
-## Docker setup for development or production
+## Docker setup
 
 ### Pre-requisites
 
-(I tested this on a fresh install of Ubuntu 18.04)
+(I tested this on a fresh install of Ubuntu 18.04 and 18.10)
 
 Make sure that you have an up-to-date version of:
  
 * [Docker](https://store.docker.com/search?type=edition&offering=community)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Running CarbAlert
+### .env file for Docker Compose
 
 The `docker-compose.yml` file requires certain environment variables to be present for deployment. I use a `.env` file for managing the environment variables. 
 
 Here is an example of my `.env` file:
 
-```bash
-# Settings
-DJANGO_SETTINGS_MODULE=carbalert.settings
+```bas## Note on optional Nginx container
 
+In production I am running CarbAlert on a virtual private server (VPS) instance whose Nginx configuration I manage manually, so I have no need for a dedicated container running Nginx.
+
+But I have included an "nginx" service in the docker-compose.yml file which will act as a reverse proxy for the Django and Flower web applications. This is most useful for local development and debugging as you will not need to install or setup Nginx on your host machine. However I have kept this service commented-out in the docker-compose.yml file. Un-comment the "nginx" service lines if you wish to run the Nginx container.
 # Mailgun
 MAILGUN_EMAIL=<insert the "from" email address for Mailgun mails here>
 MAILGUN_API_KEY=<insert your Mailgun API key here>
@@ -72,120 +69,59 @@ FLOWER_OAUTH2_EMAIL=<insert your OAuth2 GitHub email here>
 FLOWER_OAUTH2_KEY=<insert your OAuth2 secret here>
 FLOWER_OAUTH2_SECRET=<insert your OAuth2 secret here>
 FLOWER_OAUTH2_REDIRECT_URI=<insert OAuth2 redirect URI here>
-
-# Redis
-REDIS_HOST=redis:6379
-
-# Django secret
-SECRET_KEY=<insert your secret key here - only necessery for production deployment>
-
 ```
 
 *Please note:* Existing environment variables available in your current terminal session will override those in the `.env` file.
 
-#### Production deployment
+## Launching CarbAlert
 
-For *production* deployments replace the words "development" with "production" in the `DJANGO_SETTINGS_MODULE` and `SCRAPY_SETTINGS_MODULE`.
+To build and run CarbAlert using Docker you will need to issue the following commands:
 
-## Non-Docker local set-up
+```bash
+# Build and start the docker containers as described in docker-compose.yml
+$ docker-compose up -d
 
-### Make sure you have Python 3.6
+# Generate the static content for the Django web admin portal
+$ docker-compose exec web python manage.py collectstatic 
 
-*I have only tested this on Linux (Arch/Ubuntu)*
+# Creates any necessary new migrations
+$ docker-compose exec web python manage.py makemigrations 
 
-CarbAlert has been tested running on Python 3.6. It is recommended to create a [virtual environment](https://docs.python.org/3/tutorial/venv.html) in which the dependencies should be installed and from which the project should be launched. So technically the only requirement is Python 3.6.
+# Apply the required migrations
+$ docker-compose exec web python manage.py migrate
 
-To see if you are running Python 3.6 issue the following command in the terminal:
-
-``` Bash
-$ python --version
-Python 3.6.6
+# Create a super user with which we can log into the Django admin portal
+$ docker-compose exec web python manage.py createsuperuser
 ```
 
-**Depending on which distribution of Linux you use you can also try see if you Python 3.x by substituting "python3" in the command above for "python".**
+If all goes well you should be able to navigate to http://127.0.0.1/admin and see the CarbAlert admin login screen:
 
-### Install the required dependencies
+![Django admin console login screen](images/carbalert_login.png "Django admin console login screen")
 
-**This is only necessary for local development.**
+### Note on optional Nginx container
 
-To create a virtual environment and install the required dependencies issue the following commands in the terminal:
+In production I am running CarbAlert on a virtual private server (VPS) instance whose Nginx configuration I manage manually, so I have no need for a dedicated container running Nginx.
 
-``` Bash
-# Clone the repository
-$ git clone <carbalert github url>
+But I have included an "nginx" service in the docker-compose.yml file which will act as a reverse proxy for the Django and Flower web applications. This is most useful for local development and debugging as you will not need to install or setup Nginx on your host machine. However I have kept this service commented-out in the docker-compose.yml file. Un-comment the "nginx" service lines if you wish to run the Nginx container.
 
-# Change directory to the newly cloned repository
-$ cd carbalert
+## Using CarbAlert
 
-# Create a virtual environment in the repository directory
-$ python -m venv carbalert-venv
+What follows is a walk-through on how to add a user which will be receiving alerts on a newly added search term.
 
-# Activate the virtual environment
-$ source carbalert-venv/bin/activate
+## Create a new user which will receive alerts
 
-# Make sure you have the latest version of pip installed in your virtual environment
-(carbalert-venv) $ pip install --upgrade pip
+To create a new user for which search terms will be registered login with the admin user and navigate from the admin landing page to the "Users" admin page and then click the "Add user +" button on the top right. You will need to provide a username and the email address. This is the email address will be used when sending the alerts.
 
-# Install the required dependencies
-(carbalert-venv) $ pip install -r requirements.txt
-```
+![Create a new user](images/create_user.png "Create a new user")
 
-### Running CarbAlert on your local machine
+![User saved](images/dinofizz_saved.png "User saved")
 
-Once all the dependencies have been installed you will need to issue the following commands to run the various CarbAlert components.
+## Register a search term
 
-**For each of the commands below make sure that you are running them after having activated the virtual environment as described above** You may need to open a few terminal tabs/windows to get everything running at the same time.
+To register a search term you need to navigate to the "Search phrases" page from the main admin landing page, and then select the "Add search phrase +" button on the top right. You need to enter a search term and select the user which will be receiving the alerts for this term.
 
-#### Django 
+In the screenshot below you can see that I am adding the search phrase "dell" (which is sure to give me a bunch of hits from the [Carbonite laptop forum](https://carbonite.co.za/index.php?forums/laptops.32/)):
 
-To run the Django app we go through the typical Django `manage.py` commands, but use an additional parameter to point to a Django settings file that contains configuration for local development. Run the commands from the top level repository directory. 
+![Add search term](images/add_dell.png "Add search term")
 
-``` Bash
-# Prepare the database migrations
-(carbalert-venv) $ python carbalert/manage.py makemigrations
-
-# Make the database migrations
-(carbalert-venv) $ python carbalert/manage.py migrate
-
-# Run the Django application on the development web server
-(carbalert-venv) $ python carbalert/manage.py runserver
-```
-
-#### Celery Worker
-
-To run the celery worker you will need to store some of the values from the Mailgun registration into environment variables:
-
-``` Bash
-# Set the email address which Mailgun will use as a "from" address in the emails it will be sending.
-(carbelert-venv) $ MAILGUN_EMAIL=you@yourdomain.com
-
-# Set the Mailgun API key
-(carbelert-venv) $ MAILGUN_API_KEY=<your key here>
-
-# Set your Mailgun domain
-(carbelert-venv) $ MAILGUN_DOMAIN=mg.yourdomain.com
-
-```
-
-In the same shell session you can then launch the Celery worker process with the following command *issued from the parent repo directory*:
-
-``` Bash
-(carbelrt-venv) $ celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks worker --loglevel=info -f celery_worker.log --max-tasks-per-child 1 --email "${MAILGUN_EMAIL}" --key ${MAILGUN_API_KEY} --domain ${MAILGUN_DOMAIN}
-```
-
-#### Celery Beat
-
-To run the Celery Beat process which will manage the periodic Celery tasks you will need to issue the following command *from the parent repo directory*:
-
-``` Bash
-(carbalert-venv) $ celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks beat --loglevel=info -f celery_beat.log
-
-```
-
-#### Flower
-
-To run the Flower process you will need to issue the following command *from the parent repo directory*:
-
-``` Bash
-(carbalert-venv) $ celery -A carbalert.carbalert_scrapy.carbalert_scrapy.tasks flower --loglevel=debug --auth_provider=flower.views.auth.GithubLoginHandler --auth=${FLOWER_OAUTH2_EMAIL} --oauth2_key=${FLOWER_OAUTH2_KEY} --oauth2_secret=${FLOWER_OAUTH2_SECRET} --oauth2_redirect_uri=${FLOWER_OAUTH2_REDIRECT_URI} --url_prefix=flower
-```
+That's it! Once the search term has been saved it will be included in the list of search phrases during the next execution of the Scrapy spider task. If there are any hits on this search term an email will be sent out to all associated users.
