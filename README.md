@@ -2,6 +2,8 @@
 
 CarbAlert is a web application which scrapes a local (South African) second-hand computer parts forum for new posts offering laptops featuring keywords of interest (specifically the [first page of the "laptops" forum](https://carbonite.co.za/index.php?forums/laptops.32/)) I'm using [Django](https://www.djangoproject.com/) for the admin console and database/ORM integration, [Scrapy](https://scrapy.org/) for web-scraping, [Celery](http://www.celeryproject.org/) for task management, [Flower](https://flower.readthedocs.io/en/latest/) for task monitoring and [Mailgun](https://www.mailgun.com/) for sending out alert emails. I am using [Docker](https://www.docker.com/) to manage and run the containers which make up the CarbAlert application.
 
+I have also written a blog post series about CarbAlert, starting here: https://www.dinofizzotti.com/blog/2018-10-14-carbalert---part-1-let-your-next-laptop-find-you/
+
 ![Django admin console showing results](images/dell_results.png "Django admin console showing results")
 
 ![Email results](images/emails.png "Email results")
