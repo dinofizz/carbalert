@@ -37,9 +37,7 @@ Once you have completed the necessary steps to register an app you should note d
 
 You will need these values later.
 
-## Docker setup
-
-### Pre-requisites
+### Docker setup
 
 (I tested this on a fresh install of Ubuntu 18.04 and 18.10)
 
@@ -48,9 +46,7 @@ Make sure that you have an up-to-date version of:
 * [Docker](https://store.docker.com/search?type=edition&offering=community)
 * [Docker Compose](https://docs.docker.com/compose/install/)
 
-### .env file for Docker Compose
-
-The `docker-compose.yml` file requires certain environment variables to be present for deployment. I use a `.env` file for managing the environment variables. 
+The `docker-compose.yml` file requires certain environment variables to be present for deployment. I use a `.env` file for managing the environment variables. This file is stored in the project root folder (in the same place as the `docker-compose.yml` file).
 
 Here is an example of my `.env` file:
 
