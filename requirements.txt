@@ -21,7 +21,7 @@ hyperlink==18.0.0
 idna==2.7
 incremental==17.5.0
 kombu==4.2.1
-lxml==4.2.5
+lxml==4.6.2
 maya==0.5.0
 parsel==1.5.1
 pendulum==2.0.4
