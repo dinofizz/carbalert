@@ -48,7 +48,7 @@ snaptime==0.2.4
 tornado==5.1.1
 Twisted==19.7.0
 tzlocal==1.5.1
-urllib3==1.24.2
+urllib3==1.26.5
 vine==1.1.4
 w3lib==1.19.0
 zope.interface==4.6.0
