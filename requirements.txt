@@ -41,7 +41,7 @@ redis==2.10.6
 regex==2018.11.22
 requests==2.20.1
 ruamel.yaml==0.15.79
-Scrapy==1.5.1
+Scrapy==1.8.1
 service-identity==17.0.0
 six==1.11.0
 snaptime==0.2.4
