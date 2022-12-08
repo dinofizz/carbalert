@@ -5,7 +5,7 @@ Automat==0.7.0
 Babel==2.9.1
 billiard==3.5.0.4
 celery==5.2.2
-certifi==2018.10.15
+certifi==2022.12.7
 cffi==1.11.5
 chardet==3.0.4
 constantly==15.1.0
